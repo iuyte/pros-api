@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -25,7 +26,8 @@ func Load(path string) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal([]byte(frozen), &data)
+	err = json.Unmarshal(frozen, &data)
+	fmt.Println(data)
 	if err != nil {
 		return err
 	}
@@ -48,6 +50,7 @@ func Search(regex string) (matches []string, e error) {
 				return
 			}
 			m := string(bm)
+			fmt.Println(m)
 			if data[i].access == strings.Trim(strings.ToLower(regex), " ") {
 				matches = []string{m}
 				return

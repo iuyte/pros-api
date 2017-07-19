@@ -1,0 +1,29 @@
+# github.com/go-task/task
+
+default:
+  cmds:
+    - task: build
+
+clean:
+  desc: Clear files built by the project
+  cmds:
+    - rm -rf ./*/bin
+
+build:
+  desc: Build the project
+  cmds:
+    - cd ./server && task build
+    - cd ./client && task build
+
+run:
+  desc: Run the project executable
+  cmds:
+    - task: print
+      vars: {TEXT: "Running project {{.PROJECT_NAME}}"}
+    - ./server/bin/server &
+    - ./client/bin/client
+
+print:
+  desc: Prints the specified TEXT colorfully (for in-Taskfile use only)
+  cmds:
+    - "###### {{.TEXT}} ######"

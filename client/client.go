@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 )
 
 func main() {
-
-	conn, _ := net.Dial("tcp", "127.0.0.1:8081")
+	time.Sleep(time.Millisecond * 500)
+	conn, _ := net.Dial("tcp", "127.0.0.1:9999")
+	defer conn.Close()
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Key to search for: ")

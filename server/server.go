@@ -17,16 +17,24 @@ var (
 func main() {
 	var (
 		e    error
-		port string = os.Args[1]
+		port string
 	)
-	api.Load("./pros-bot/api.json")
-	ln, e = net.Listen("tcp", ":"+port)
+	if len(os.Args) > 1 {
+		port = ":" + os.Args[1]
+	} else {
+		port = ":9999"
+	}
+	e = api.Load("/home/ethan/go/src/github.com/iuyte/pros-api/server/pros-bot/api.json")
+	printErr(e)
+	ln, e = net.Listen("tcp", port)
+	defer ln.Close()
 	printErr(e)
 	fmt.Println("Server running at 127.0.0.1:" + port)
 
 	for {
 		conn, e = ln.Accept()
 		printErr(e)
+		go handleConn(conn)
 	}
 }
 
@@ -39,9 +47,7 @@ func handleConn(net.Conn) {
 }
 
 func handle(raw string) {
-	if strings.HasPrefix(raw, "GET /") {
-		return
-	}
+	fmt.Println(raw)
 	results, _ := api.Search(raw)
 	send(strings.Join(results, ""))
 }
