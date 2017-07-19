@@ -16,7 +16,7 @@ build:
       vars: {TEXT: "Building {{.PROJECT_NAME}}"}
     - task: clean
     - mkdir bin
-    - go build -v -i -o bin/{{.PROJECT_NAME}} {{.MAIN_NAME}}
+    - go build -v -i -o bin/{{.PROJECT_NAME}}
 
 run:
   desc: Run the project executable

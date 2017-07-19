@@ -1,17 +1,19 @@
 package main
 
 import (
-	"../api"
 	"bufio"
 	"fmt"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/iuyte/pros-api/api"
 )
 
 var (
 	ln   net.Listener
 	conn net.Conn
+	pros api.API
 )
 
 func main() {
@@ -24,7 +26,7 @@ func main() {
 	} else {
 		port = ":9999"
 	}
-	e = api.Load("/home/ethan/go/src/github.com/iuyte/pros-api/server/pros-bot/api.json")
+	e = pros.Load("/home/ethan/go/src/github.com/iuyte/pros-api/server/pros-bot/api.p")
 	printErr(e)
 	ln, e = net.Listen("tcp", port)
 	defer ln.Close()
@@ -48,7 +50,7 @@ func handleConn(conn net.Conn) {
 
 func handle(raw string) {
 	fmt.Println(raw)
-	results, _ := api.Search(raw)
+	results, _ := pros.Search(raw)
 	send(strings.Join(results, ""))
 }
 

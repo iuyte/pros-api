@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"regexp"
 	"strings"
+
+	"github.com/vmihailenco/msgpack"
 )
 
 type APIData struct {
@@ -19,44 +21,49 @@ type APIData struct {
 	extra       string
 }
 
-var data []APIData
+type API struct {
+	data []APIData
+}
 
-func Load(path string) error {
+func (a API) Load(path string) error {
 	frozen, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(frozen, &data)
-	fmt.Println(data)
+	err = msgpack.Unmarshal(frozen, &a.data)
 	if err != nil {
 		return err
 	}
+	fmt.Println(a.data[0].description)
 	return nil
 }
 
-func Search(regex string) (matches []string, e error) {
-	e = nil
+func (a API) Search(regex string) ([]string, error) {
+	var (
+		e       error = nil
+		matches []string
+	)
 	r, err := regexp.Compile(regex)
 	if err != nil {
 		e = err
-		return
+		return matches, e
 	}
-	for i := 0; i < len(data); i++ {
-		findIn := data[i].name + data[i].access + data[i].description
+
+	for i := 0; i < len(a.data); i++ {
+		findIn := a.data[i].name + a.data[i].access + a.data[i].description
 		if len(r.FindAllString(findIn, -1)) > 0 {
-			bm, err := json.Marshal(data[i])
+			bm, err := json.Marshal(a.data[i])
 			if err != nil {
 				e = err
-				return
+				return matches, e
 			}
 			m := string(bm)
 			fmt.Println(m)
-			if data[i].access == strings.Trim(strings.ToLower(regex), " ") {
-				matches = []string{m}
-				return
+			if a.data[i].access == strings.Trim(strings.ToLower(regex), " ") {
+				matches = append([]string{m}, matches...)
 			}
 			matches = append(matches, m)
 		}
 	}
-	return
+	return matches, e
 }
