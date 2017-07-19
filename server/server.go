@@ -38,7 +38,7 @@ func main() {
 	}
 }
 
-func handleConn(net.Conn) {
+func handleConn(conn net.Conn) {
 	for {
 		message, _ := bufio.NewReader(conn).ReadString('\n')
 		message = strings.Trim(strings.Split(message, "\n")[0], " ")
