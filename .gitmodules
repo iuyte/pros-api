@@ -1,0 +1,3 @@
+[submodule "server/pros-bot"]
+	path = server/pros-bot
+	url = https://github.com/iuyte/pros-bot
