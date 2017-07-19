@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"regexp"
 	"strings"
-
-	"github.com/vmihailenco/msgpack"
 )
 
 type APIData struct {
@@ -30,11 +28,10 @@ func (a API) Load(path string) error {
 	if err != nil {
 		return err
 	}
-	err = msgpack.Unmarshal(frozen, &a.data)
-	if err != nil {
-		return err
+	err = json.Unmarshal([]byte(string(frozen)), &a.data)
+	for i := 0; i < len(a.data); i++ {
+		fmt.Print(a.data[i].access, ";")
 	}
-	fmt.Println(a.data[0].description)
 	return nil
 }
 

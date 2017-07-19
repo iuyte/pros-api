@@ -26,7 +26,7 @@ func main() {
 	} else {
 		port = ":9999"
 	}
-	e = pros.Load("/home/ethan/go/src/github.com/iuyte/pros-api/server/pros-bot/api.p")
+	e = pros.Load("server/pros-bot/api.json")
 	printErr(e)
 	ln, e = net.Listen("tcp", port)
 	defer ln.Close()
