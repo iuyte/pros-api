@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+/*
 type APIData struct {
 	group       string
 	name        string
@@ -18,9 +19,21 @@ type APIData struct {
 	access      string
 	extra       string
 }
+*/
+type APIData []struct {
+	Returns     string        `json:"returns"`
+	Typec       string        `json:"typec"`
+	Group       string        `json:"group"`
+	Link        string        `json:"link"`
+	Extra       string        `json:"extra"`
+	Name        string        `json:"name"`
+	Params      []interface{} `json:"params"`
+	Access      string        `json:"access"`
+	Description string        `json:"description"`
+}
 
 type API struct {
-	data []APIData
+	data APIData
 }
 
 func (a API) Load(path string) error {
@@ -29,9 +42,13 @@ func (a API) Load(path string) error {
 		return err
 	}
 	err = json.Unmarshal([]byte(string(frozen)), &a.data)
-	for i := 0; i < len(a.data); i++ {
-		fmt.Print(a.data[i].access, ";")
+	if err != nil {
+		return err
 	}
+	for i := 0; i < len(a.data); i++ {
+		fmt.Print(a.data[i].Access, ";")
+	}
+	fmt.Println("")
 	return nil
 }
 
@@ -47,7 +64,7 @@ func (a API) Search(regex string) ([]string, error) {
 	}
 
 	for i := 0; i < len(a.data); i++ {
-		findIn := a.data[i].name + a.data[i].access + a.data[i].description
+		findIn := a.data[i].Name + a.data[i].Access + a.data[i].Description
 		if len(r.FindAllString(findIn, -1)) > 0 {
 			bm, err := json.Marshal(a.data[i])
 			if err != nil {
@@ -56,7 +73,7 @@ func (a API) Search(regex string) ([]string, error) {
 			}
 			m := string(bm)
 			fmt.Println(m)
-			if a.data[i].access == strings.Trim(strings.ToLower(regex), " ") {
+			if a.data[i].Access == strings.Trim(strings.ToLower(regex), " ") {
 				matches = append([]string{m}, matches...)
 			}
 			matches = append(matches, m)

@@ -27,7 +27,9 @@ func main() {
 		port = ":9999"
 	}
 	e = pros.Load("server/pros-bot/api.json")
-	printErr(e)
+	if e != nil {
+		panic(e)
+	}
 	ln, e = net.Listen("tcp", port)
 	defer ln.Close()
 	printErr(e)
