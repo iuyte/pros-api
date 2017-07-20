@@ -13,7 +13,7 @@ import (
 var (
 	ln   net.Listener
 	conn net.Conn
-	pros api.API
+	pros *api.API
 )
 
 func main() {
@@ -26,6 +26,7 @@ func main() {
 	} else {
 		port = ":9999"
 	}
+	pros = new(api.API)
 	e = pros.Load("server/pros-bot/api.json")
 	if e != nil {
 		panic(e)
