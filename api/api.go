@@ -44,7 +44,7 @@ func (a *API) Load(path string) error {
 
 func sort(l []result) []string {
 	sorted := []string{"[" + l[0].Json + ","}
-	for i := 1; i < len(l)-1; i++ {
+	for i := 1; i < len(l)-1 && i < 20; i++ {
 		sorted = append(sorted, l[i].Json+",")
 	}
 
