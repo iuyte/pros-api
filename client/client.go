@@ -3,7 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"net"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -23,22 +24,21 @@ func loop() {
 	key := bufio.NewReader(os.Stdin)
 	fmt.Print("Key to search for: ")
 	text, _ := key.ReadString('\n')
+	search := string(text)
+	search = strings.Split(search, "\n")[0]
 
-	conn, _ := net.Dial("tcp", "127.0.0.1:9999")
-	defer conn.Close()
-
-	bufio.NewReader(conn).ReadString('\n')
-	fmt.Fprintf(conn, text+"\n")
-
-	messageReader := bufio.NewReader(conn)
-	messageBytes := make([]byte, 65536)
-	_, e := messageReader.Read(messageBytes)
-	if e != nil {
-		panic(e)
+	resp, err := http.Get("http://localhost:9999/" + search)
+	if err != nil {
+		panic(err)
 	}
-	message := string(messageBytes)
-	message = strings.Split(message, "},")[0]
-	message = message[1:] + "}"
+	defer resp.Body.Close()
+
+	mbyt, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	message := strings.Split(string(mbyt), "},")[0][1:] + "}"
 	message, _ = jsonbeautify.Beautify(message)
 
 	fmt.Println("Result:")
