@@ -44,20 +44,18 @@ func main() {
 }
 
 func handleConn(conn net.Conn) {
-	for {
-		message, _ := bufio.NewReader(conn).ReadString('\n')
-		message = strings.Trim(strings.Split(message, "\n")[0], " ")
-		go handle(message)
-	}
+	send(conn, "")
+	message, _ := bufio.NewReader(conn).ReadString('\n')
+	message = strings.Trim(strings.Split(message, "\n")[0], " ")
+	go handle(conn, message)
 }
 
-func handle(raw string) {
-	fmt.Println(raw)
+func handle(conn net.Conn, raw string) {
 	results, _ := pros.Search(raw)
-	send(strings.Join(results, ""))
+	send(conn, strings.Join(results, "\n"))
 }
 
-func send(txt string) {
+func send(conn net.Conn, txt string) {
 	conn.Write([]byte(txt + "\n"))
 }
 

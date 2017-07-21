@@ -1,9 +1,7 @@
 package api
 
 import (
-	"container/list"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -44,46 +42,34 @@ func (a *API) Load(path string) error {
 	return nil
 }
 
-func sort(l []result) (sorted []string) {
-	ll := list.New()
-	for lk := range l {
-		ll.PushBack(lk)
+func sort(l []result) []string {
+	sorted := []string{"[" + l[0].Json + ","}
+	for i := 1; i < len(l)-1; i++ {
+		sorted = append(sorted, l[i].Json+",")
 	}
 
-	for le := ll.Front(); le != nil; le = le.Next() {
-		lev := le.Value.(map[string]interface{})
-		lv := lev["Score"].(int)
-		r := ll.Front()
-		for ; r != nil; r = r.Next() {
-			rev := r.Value.(map[string]interface{})
-			rv := rev["Score"].(int)
-			if lv > rv {
-				break
-			}
-		}
-		ll.MoveBefore(le, r)
-	}
+	return append(sorted, l[len(l)-1].Json+"]")
+}
 
-	for li := ll.Front(); li != nil; li = li.Next() {
-		lv := li.Value.(map[string]interface{})
-		sorted = append(sorted, lv["Json"].(string))
-	}
-
-	return
+func insert(slice []result, index int, value result) []result {
+	// slice = slice[0 : len(slice)+1]
+	copy(slice[index+1:], slice[index:])
+	slice[index] = value
+	return slice
 }
 
 func (a *API) Search(regex string) ([]string, error) {
 	var (
-		e       error = nil
-		matches []result
+		e       error    = nil
+		matches []result = make([]result, len(a.data))
 	)
+
 	r, err := regexp.Compile(strings.Trim(regex, " "))
 	if err != nil {
 		e = err
 		return nil, e
 	}
 
-	fmt.Println(len(a.data))
 	for i := range a.data {
 		score := 0
 
@@ -91,24 +77,28 @@ func (a *API) Search(regex string) ([]string, error) {
 		for j := 0; j < 3; j++ {
 			score += len(r.FindAllString(findLn[j], -1))
 		}
-		if a.data[i].Access == strings.Trim(strings.ToLower(regex), " ") {
-			score += 2
+		if r.MatchString(strings.Trim(strings.ToLower(regex), " ")) {
+			score += 10
 		}
 
-		fmt.Print(findLn)
+		if score < 0 {
+			continue
+		}
+		bm, err := json.Marshal(a.data[i])
+		if err != nil {
+			e = err
+			return nil, e
+		}
+		m := string(bm)
 
-		if score > 1 {
-			bm, err := json.Marshal(a.data[i])
-			if err != nil {
-				e = err
-				return nil, e
+		place := 0
+		for ; place < len(matches); place++ {
+			if score > matches[place].Score {
+				break
 			}
-
-			m := string(bm)
-			fmt.Println(m)
-
-			matches = append(matches, result{m, score})
 		}
+		matches = insert(matches, place, result{m, score})
+
 	}
 
 	return sort(matches), e
