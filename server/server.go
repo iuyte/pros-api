@@ -1,63 +1,51 @@
 package main
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
-	"net"
+	"io"
 	"os"
 	"strings"
 
+	"github.com/hoisie/web"
 	"github.com/iuyte/pros-api/api"
 )
 
-var (
-	ln   net.Listener
-	conn net.Conn
-	pros *api.API
-)
+var pros *api.API
 
 func main() {
 	var (
 		e    error
 		port string
 	)
+
 	if len(os.Args) > 1 {
 		port = ":" + os.Args[1]
 	} else {
 		port = ":9999"
 	}
+
 	pros = new(api.API)
 	e = pros.Load("server/pros-bot/api.json")
 	if e != nil {
-		panic(e)
+		fmt.Println(e)
 	}
-	ln, e = net.Listen("tcp", port)
-	defer ln.Close()
-	printErr(e)
-	fmt.Println("Server running at 127.0.0.1:" + port)
 
-	for {
-		conn, e = ln.Accept()
-		printErr(e)
-		go handleConn(conn)
+	web.Get("/(.*)", handle)
+	web.Run(port)
+}
+
+func handle(ctx *web.Context, raw string) {
+	results, e := pros.Search(raw)
+	response := strings.Join(results, "")
+	if e != nil {
+		response = e.Error()
 	}
-}
 
-func handleConn(conn net.Conn) {
-	defer conn.Close()
-	send(conn, "")
-	message, _ := bufio.NewReader(conn).ReadString('\n')
-	message = strings.Trim(strings.Split(message, "\n")[0], " ")
-	handle(conn, message)
-}
+	var buf bytes.Buffer
+	buf.WriteString(response)
 
-func handle(conn net.Conn, raw string) {
-	results, _ := pros.Search(raw)
-	send(conn, strings.Join(results, "\n"))
-}
-
-func send(conn net.Conn, txt string) {
-	conn.Write([]byte(txt + "\n"))
+	io.Copy(ctx, &buf)
 }
 
 func printErr(e error) {
