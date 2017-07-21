@@ -23,6 +23,18 @@ run:
     - ./server/bin/server &
     - ./client/bin/client
 
+server:
+  desc: Run the server
+  cmds:
+    - cd server && task build
+    - server/bin/server
+
+client:
+  desc: Run the client
+  cmds:
+    - cd client && task build
+    - client/bin/client
+
 print:
   desc: Prints the specified TEXT colorfully (for in-Taskfile use only)
   cmds:
