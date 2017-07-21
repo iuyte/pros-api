@@ -44,10 +44,11 @@ func main() {
 }
 
 func handleConn(conn net.Conn) {
+	defer conn.Close()
 	send(conn, "")
 	message, _ := bufio.NewReader(conn).ReadString('\n')
 	message = strings.Trim(strings.Split(message, "\n")[0], " ")
-	go handle(conn, message)
+	handle(conn, message)
 }
 
 func handle(conn net.Conn, raw string) {

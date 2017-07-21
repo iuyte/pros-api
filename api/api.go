@@ -52,7 +52,6 @@ func sort(l []result) []string {
 }
 
 func insert(slice []result, index int, value result) []result {
-	// slice = slice[0 : len(slice)+1]
 	copy(slice[index+1:], slice[index:])
 	slice[index] = value
 	return slice

@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/iuyte/jsonbeautify"
 )
 
 func main() {
@@ -35,8 +37,10 @@ func loop() {
 		panic(e)
 	}
 	message := string(messageBytes)
-	bestResult := strings.Split(message, "},")[0] + "}]"
+	message = strings.Split(message, "},")[0]
+	message = message[1:] + "}"
+	message, _ = jsonbeautify.Beautify(message)
 
 	fmt.Println("Result:")
-	fmt.Println(bestResult)
+	fmt.Println(message)
 }
