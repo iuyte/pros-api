@@ -27,7 +27,7 @@ func loop() {
 	search := string(text)
 	search = strings.Split(search, "\n")[0]
 
-	resp, err := http.Get("http://localhost:9999/" + search)
+	resp, err := http.Get("http://localhost:9999/search/" + search)
 	if err != nil {
 		panic(err)
 	}

@@ -31,11 +31,14 @@ func main() {
 		fmt.Println(e)
 	}
 
-	web.Get("/(.*)", handle)
+	web.Get("/search/(.*)", handle)
 	web.Run(port)
 }
 
 func handle(ctx *web.Context, raw string) {
+	ctx.SetHeader("Content-Type", "text/json; charset=utf8", true)
+	ctx.SetHeader("Server", "Go", true)
+
 	results, e := pros.Search(raw)
 	response := strings.Join(results, "")
 	if e != nil {
