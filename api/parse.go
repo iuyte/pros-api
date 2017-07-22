@@ -16,7 +16,6 @@ func Parse(pathIn, pathOut string) error {
 
 	lines := strings.Split(string(loaded), "\n")[:]
 	for i := bypassBioler(lines); i < len(lines); i++ {
-
 	}
 
 	wbyt, e := json.Marshal(a)

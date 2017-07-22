@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -31,22 +32,46 @@ func main() {
 		fmt.Println(e)
 	}
 
-	web.Get("/search/(.*)", handle)
+	web.Get("/", JSON)
+	web.Get("/search", handle)
 	web.Run(port)
 }
 
-func handle(ctx *web.Context, raw string) {
+func handle(ctx *web.Context) {
 	ctx.SetHeader("Content-Type", "text/json; charset=utf8", true)
 	ctx.SetHeader("Server", "Go", true)
 
-	results, e := pros.Search(raw)
-	response := strings.Join(results, "")
+	search, e := pros.Make(ctx.Params)
+	for i := range e {
+		if e[i] != nil {
+			panic(e[i])
+		}
+	}
+
+	results, e := pros.Find(search)
 	if e != nil {
-		response = e.Error()
+		panic(e)
 	}
 
 	var buf bytes.Buffer
+	response := strings.Join(results, "")
 	buf.WriteString(response)
+
+	io.Copy(ctx, &buf)
+}
+
+func JSON(ctx *web.Context) {
+	ctx.SetHeader("Content-Type", "text/json; charset=utf8", true)
+	ctx.SetHeader("Server", "Go", true)
+
+	frozen, err := ioutil.ReadFile(pros.Path)
+	raw := string(frozen)
+	if err != nil {
+		raw = err.Error()
+	}
+
+	var buf bytes.Buffer
+	buf.WriteString(raw)
 
 	io.Copy(ctx, &buf)
 }
